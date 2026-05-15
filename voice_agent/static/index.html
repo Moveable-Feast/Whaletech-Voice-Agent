@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>园区访客登记系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .mode-select {
+            margin-bottom: 20px;
+        }
+        
+        .mode-title {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .mode-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 20px 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .mode-btn.voice {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .mode-btn.text {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+        
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .mode-btn:active {
+            transform: translateY(0);
+        }
+        
+        .mode-btn .icon {
+            font-size: 28px;
+        }
+        
+        .button {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            box-shadow: none;
+            margin-top: 10px;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .button.secondary {
+            background: #6c757d;
+            margin-top: 10px;
+            box-shadow: none;
+        }
+
+        .button.secondary:hover {
+            background: #5a6268;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        
+        .status.idle {
+            display: none;
+        }
+        
+        .status.listening {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+            color: #856404;
+            display: block;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            display: block;
+        }
+        
+        .status.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            display: block;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .chat-area {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        
+        .chat-message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .chat-message.ai {
+            background: #e9ecef;
+            color: #333;
+            margin-right: auto;
+        }
+        
+        .chat-message:last-child {
+            margin-bottom: 0;
+        }
+        
+        .input-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-area input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-area input:focus {
+            border-color: #667eea;
+        }
+        
+        .input-area button {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .input-area button:hover {
+            transform: scale(1.05);
+        }
+        
+        .input-area button:active {
+            transform: scale(1);
+        }
+        
+        .tip {
+            font-size: 12px;
+            color: #999;
+            margin-top: 15px;
+        }
+        
+        .visitor-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .visitor-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚗</div>
+        <h1>园区访客登记</h1>
+        <p class="subtitle">请选择对话方式完成登记</p>
+        <p style="margin-top: 10px; font-size: 14px; color: #666;">
+            <a href="/test_speech" target="_blank" style="color: #667eea; text-decoration: none;">🔍 语音识别测试</a>
+        </p>
+        
+        <!-- 模式选择界面 -->
+        <div id="modeSelect" class="mode-select">
+            <div class="mode-title">选择对话模式</div>
+            <div class="mode-buttons">
+                <button class="mode-btn voice" onclick="selectMode('voice')">
+                    <span class="icon">🎤</span>
+                    <span>语音对话</span>
+                </button>
+                <button class="mode-btn text" onclick="selectMode('text')">
+                    <span class="icon">⌨️</span>
+                    <span>文字输入</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 语音模式界面 -->
+        <div id="voiceMode" class="hidden">
+            <button id="startBtn" class="button" onclick="startVoiceConversation()">
+                <span>🎤 开始语音登记</span>
+            </button>
+            <button id="voiceToTextBtn" class="button secondary" onclick="selectMode('text')">
+                <span>⌨️ 切换到文字输入</span>
+            </button>
+            <div id="voiceStatus" class="status idle">正在聆听...</div>
+        </div>
+        
+        <!-- 文字模式界面 -->
+        <div id="textMode" class="hidden">
+            <div id="textStatus" class="status idle"></div>
+        </div>
+        
+        <!-- 聊天区域（两种模式共用） -->
+        <div id="chatArea" class="chat-area hidden"></div>
+        
+        <!-- 文字输入区域 -->
+        <div id="textInputArea" class="input-area hidden">
+            <input type="text" id="messageInput" placeholder="输入您的信息..." onkeyup="handleKeyPress(event)">
+            <button onclick="sendTextMessage()">发送</button>
+        </div>
+        
+        <!-- 返回按钮 -->
+        <button id="backBtn" class="button back-btn hidden" onclick="goBack()">返回选择</button>
+        
+        <!-- 登记信息展示 -->
+        <div id="visitorInfo" class="visitor-info hidden">
+            <h3>📋 登记信息</h3>
+            <div class="info-row">
+                <span class="info-label">车牌号</span>
+                <span id="infoPlate" class="info-value">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">来访单位</span>
+                <span id="infoCompany" class="info-value">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">联系电话</span>
+                <span id="infoPhone" class="info-value">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">来访事由</span>
+                <span id="infoPurpose" class="info-value">-</span>
+            </div>
+        </div>
+        
+        <p class="tip" id="modeTip">💡 提示：请使用Chrome浏览器以获得最佳体验</p>
+    </div>
+
+    <script>
+        let recognition;
+        let isRecording = false;
+        let isSpeaking = false;
+        let visitorData = {};
+        let currentMode = '';
+        let lastRecognizedTime = 0;
+        let debounceTimer = null;
+        let silenceTimer = null;
+
+        function selectMode(mode) {
+            currentMode = mode;
+            
+            document.getElementById('modeSelect').classList.add('hidden');
+            
+            document.getElementById('voiceMode').classList.add('hidden');
+            document.getElementById('textMode').classList.add('hidden');
+            document.getElementById('chatArea').classList.add('hidden');
+            document.getElementById('textInputArea').classList.add('hidden');
+            document.getElementById('visitorInfo').classList.add('hidden');
+            
+            if (mode === 'voice') {
+                document.getElementById('voiceMode').classList.remove('hidden');
+                document.getElementById('modeTip').textContent = '💡 提示：请使用Chrome浏览器以获得最佳语音体验';
+            } else {
+                document.getElementById('textMode').classList.remove('hidden');
+                document.getElementById('chatArea').classList.remove('hidden');
+                document.getElementById('textInputArea').classList.remove('hidden');
+                document.getElementById('backBtn').classList.remove('hidden');
+                document.getElementById('modeTip').textContent = '💡 提示：请输入车牌号、来访单位、事由和联系电话';
+                
+                addMessage('ai', '您好您好，这里是园区门卫，请说一下您的车牌号、去哪家公司，还有什么事儿？');
+            }
+        }
+
+        function goBack() {
+            isRecording = false;
+            isSpeaking = false;
+            if (recognition) {
+                recognition.stop();
+            }
+            if (debounceTimer) clearTimeout(debounceTimer);
+            if (silenceTimer) clearTimeout(silenceTimer);
+            visitorData = {};
+            
+            document.getElementById('voiceMode').classList.add('hidden');
+            document.getElementById('textMode').classList.add('hidden');
+            document.getElementById('chatArea').classList.add('hidden');
+            document.getElementById('textInputArea').classList.add('hidden');
+            document.getElementById('backBtn').classList.add('hidden');
+            document.getElementById('visitorInfo').classList.add('hidden');
+            document.getElementById('voiceStatus').classList.add('hidden');
+            document.getElementById('textStatus').classList.add('hidden');
+            
+            document.getElementById('chatArea').innerHTML = '';
+            document.getElementById('messageInput').value = '';
+            
+            document.getElementById('modeSelect').classList.remove('hidden');
+            document.getElementById('modeTip').textContent = '💡 提示：请使用Chrome浏览器以获得最佳体验';
+        }
+
+        function startVoiceConversation() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showStatus('voice', 'error', '<strong>浏览器不支持</strong><br>请使用Chrome浏览器以获得最佳体验');
+                document.getElementById('startBtn').style.display = 'none';
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    initRecognition();
+                    document.getElementById('startBtn').style.display = 'none';
+                    document.getElementById('chatArea').classList.remove('hidden');
+                    document.getElementById('backBtn').classList.remove('hidden');
+                    addMessage('ai', '您好您好，这里是园区门卫，请说一下您的车牌号、去哪家公司，还有什么事儿？');
+                    speak('您好您好，这里是园区门卫，请说一下您的车牌号、去哪家公司，还有什么事儿？');
+                })
+                .catch(err => {
+                    console.error('麦克风权限错误:', err);
+                    let errorMsg = '';
+                    if (err.name === 'NotAllowedError') {
+                        errorMsg = '<strong>麦克风权限被拒绝</strong><br>请在浏览器地址栏左侧点击🔒图标，允许麦克风访问，然后刷新页面重试';
+                    } else if (err.name === 'NotFoundError') {
+                        errorMsg = '<strong>未找到麦克风设备</strong><br>请检查麦克风是否连接正常，或切换到文字模式';
+                    } else if (err.name === 'NotReadableError') {
+                        errorMsg = '<strong>麦克风被占用</strong><br>请关闭其他使用麦克风的应用后重试';
+                    } else {
+                        errorMsg = '<strong>无法访问麦克风</strong><br>错误: ' + err.message;
+                    }
+                    showStatus('voice', 'error', errorMsg);
+                    document.getElementById('startBtn').style.display = 'none';
+                });
+        }
+
+        function initRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            recognition.maxDuration = 10;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                showStatus('voice', 'listening', '🎤 正在聆听，请说话...');
+            };
+
+            recognition.onresult = (event) => {
+                const now = Date.now();
+                if (now - lastRecognizedTime < 1000) {
+                    return;
+                }
+                
+                const transcript = event.results[event.resultIndex][0].transcript.trim();
+                lastRecognizedTime = now;
+                
+                if (transcript && transcript.length > 1) {
+                    if (debounceTimer) clearTimeout(debounceTimer);
+                    if (silenceTimer) clearTimeout(silenceTimer);
+                    
+                    addMessage('user', transcript);
+                    sendMessage(transcript);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('语音识别错误:', event.error);
+                if (event.error === 'not-allowed') {
+                    showStatus('voice', 'error', '麦克风权限被拒绝');
+                } else if (event.error === 'no-speech') {
+                    showStatus('voice', 'listening', '🎤 正在聆听，请说话...');
+                } else if (event.error === 'audio-capture') {
+                    showStatus('voice', 'error', '无法访问麦克风');
+                } else {
+                    showStatus('voice', 'error', '语音识别出错，请重试');
+                }
+                
+                if (isRecording && !isSpeaking) {
+                    setTimeout(() => {
+                        if (isRecording && !isSpeaking) {
+                            try {
+                                recognition.start();
+                            } catch (e) {
+                                console.error('重启识别失败:', e);
+                            }
+                        }
+                    }, 500);
+                }
+            };
+
+            recognition.onend = () => {
+                if (isRecording && !isSpeaking) {
+                    setTimeout(() => {
+                        if (isRecording && !isSpeaking) {
+                            try {
+                                recognition.start();
+                            } catch (e) {
+                                console.error('重启识别失败:', e);
+                            }
+                        }
+                    }, 300);
+                }
+            };
+
+            recognition.start();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendTextMessage();
+            }
+        }
+
+        function sendTextMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            input.value = '';
+            addMessage('user', message);
+            sendMessage(message);
+        }
+
+        function sendMessage(message) {
+            if (currentMode === 'voice') {
+                isSpeaking = true;
+                showStatus('voice', 'listening', '🤔 正在处理...');
+            }
+            
+            fetch('/api/voice/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addMessage('ai', data.response);
+                    
+                    if (currentMode === 'voice') {
+                        speak(data.response);
+                    }
+
+                    if (data.complete) {
+                        if (currentMode === 'voice') {
+                            isRecording = false;
+                            isSpeaking = false;
+                            if (recognition) recognition.stop();
+                            showStatus('voice', 'success', '✓ 登记完成！已通知门卫抬杆');
+                        } else {
+                            document.getElementById('textInputArea').classList.add('hidden');
+                            showStatus('text', 'success', '✓ 登记完成！已通知门卫抬杆');
+                        }
+                        
+                        visitorData = data.data;
+                        showVisitorInfo();
+                    } else {
+                        if (currentMode === 'voice') {
+                            setTimeout(() => {
+                                isSpeaking = false;
+                                showStatus('voice', 'listening', '🎤 正在聆听，请说话...');
+                            }, 500);
+                        }
+                    }
+                } else {
+                    showStatus(currentMode, 'error', '服务器错误，请重试');
+                    addMessage('ai', '抱歉，系统暂时无法响应，请稍后重试');
+                    if (currentMode === 'voice') {
+                        isSpeaking = false;
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('网络错误:', err);
+                showStatus(currentMode, 'error', '网络连接失败');
+                if (currentMode === 'voice') {
+                    isSpeaking = false;
+                }
+            });
+        }
+
+        function addMessage(sender, text) {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.textContent = text;
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            
+            const voices = window.speechSynthesis.getVoices();
+            const chineseVoice = voices.find(v => v.lang.startsWith('zh')) || voices.find(v => v.lang.startsWith('zh-CN'));
+            if (chineseVoice) {
+                utterance.voice = chineseVoice;
+            }
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                if (isRecording) {
+                    showStatus('voice', 'listening', '🎤 正在聆听，请说话...');
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error('重启识别失败:', e);
+                    }
+                }
+            };
+            
+            utterance.onerror = () => {
+                isSpeaking = false;
+            };
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function showStatus(mode, type, message) {
+            const status = mode === 'voice' ? document.getElementById('voiceStatus') : document.getElementById('textStatus');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+
+        function showVisitorInfo() {
+            const infoDiv = document.getElementById('visitorInfo');
+            infoDiv.classList.remove('hidden');
+            
+            document.getElementById('infoPlate').textContent = visitorData.plate_number || '未提供';
+            document.getElementById('infoCompany').textContent = visitorData.company || '未提供';
+            document.getElementById('infoPhone').textContent = visitorData.phone || '未提供';
+            document.getElementById('infoPurpose').textContent = visitorData.purpose || '未说明';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.speechSynthesis.getVoices();
+        });
+    </script>
+</body>
+</html>
